@@ -161,40 +161,41 @@ function getPosts($sql) {
         $blog_post_id = $post['post_id'];
         $blog_post_title = $post['post_title'];
         $blog_post_author = $post['post_author'];
-        $blog_post_date = $post['post_date'];
+        $blog_post_price = $post['post_price'];
         $blog_post_image = $post['post_image'];
         $blog_post_content = $post['post_content'];
         $author_name = getAuthorByPost($blog_post_author);
         ?>
-        <h2>
+
+        <div class="col-md-3 product-container">
+            <div class="image-container">
+                <a href='post.php?p_id=<?php echo $blog_post_id ?>'>
+                    <img class='img-responsive' src='images/<?php echo $blog_post_image ?>' alt=''>
+                </a>
+            </div>
+
             <a href='post.php?p_id=<?php echo $blog_post_id; ?>'>
-                <?php echo $blog_post_title ?>
+                <?php echo substr($blog_post_title, 0, 20) ?>
             </a>
-        </h2>
-        <p class='lead'>by
-            <a href='user.php?u_id=<?php echo $blog_post_author ?>'>
-                <?php echo $author_name ?>
+            
+            <p class='lead'><strong><?php echo getPrice($blog_post_price) . " €"?></strong></p>
+            <p>Comments: <?php echo getCommentCount($blog_post_id) ?></p>
+
+            <a class='btn btn-primary' href='index.php?to_cart=<?php echo $blog_post_id ?>'>Ielikt grozā
+                <span class='glyphicon glyphicon-chevron-right'></span>
             </a>
-        </p>
-        <p>
-            <span class='glyphicon glyphicon-time'></span> 
-                Posted on <?php echo $blog_post_date ?>
-                | Comments: <?php echo getCommentCount($blog_post_id) ?>
-        </p>
-        <a href='post.php?p_id=<?php echo $blog_post_id ?>'>
-            <img class='img-responsive' src='images/<?php echo $blog_post_image ?>' alt=''>
-        </a>
-        <hr>
-        <p>
-            <?php
-            $clean_post_cont = strip_tags($blog_post_content);
-            echo substr($clean_post_cont, 0, 100);
-            ?>...
-        </p>
-        <a class='btn btn-primary' href='post.php?p_id=<?php echo $blog_post_id ?>'>Read More
-            <span class='glyphicon glyphicon-chevron-right'></span>
-        </a>
-        <hr>
+            
+            <hr>
+            <p>
+                <?php
+                $clean_post_cont = strip_tags($blog_post_content);
+                echo substr($clean_post_cont, 0, 80);
+                ?>...
+            </p>
+
+        </div>
+
+
         <?php
     }
 }
@@ -250,7 +251,7 @@ function getPostCount($column="", $value="") {
     return $post_count;
 }
 function showPostsPaginated($column="", $value="", $offset) {//$per_page for settings
-    $per_page = 2;
+    $per_page = 6;
     global $connection;
     if (empty($column)) {
         $query = "SELECT * FROM posts WHERE post_status = 'published' ORDER BY post_id DESC LIMIT {$offset}, {$per_page} ";
@@ -380,7 +381,6 @@ function getUsers() {
     fetchAndPrint($all_users);
 }
 function getUsersOnline($time_out) {
-    global $connection;
     $online = countUsrsOn($time_out);
     foreach($online as $user) {
         $get_user = getUserById($user['user_id']);
@@ -486,5 +486,126 @@ function sendEmailNotification(string $from, string $subject, string $content): 
     } catch (Exception $e) {
         echo "Mailer Error: " . $mail->ErrorInfo;
     }
+}
+//shop management
+function getPrice(int $price): string {
+    $number = $price/100;
+    $formatted_number = number_format($number, 2, '.', '');
+    return $formatted_number;
+}
+function getCart(int $user_id): array {
+    $user = getUserById($user_id)->fetch_assoc();
+    $currentCartJson = $user['user_cart'];
+    $currentCart = json_decode($currentCartJson, true);
+    if(gettype($currentCart) != 'array') {
+        $currentCart = [];
+    }
+    return $currentCart;
+}
+function addToCart(int $prod_id, int $user_id): bool {
+    global $connection;
+    $currentCart = getCart($user_id);
+    if(!isset($currentCart)) {
+        $currentCart = [];
+    }
+    array_push($currentCart, $prod_id);
+    $currentCartNewJson = json_encode($currentCart);
+    $query = "UPDATE users SET user_cart = '{$currentCartNewJson}' WHERE user_id = {$user_id} ";
+    $exec_query = mysqli_query($connection, $query);
+    if(!checkQuery($exec_query)) {
+        return false;
+    } else {
+        return true;
+    }
+}
+function removeFromCart(int $item_id, int $user_id): bool {
+    global $connection;
+    $currentCart = getCart($user_id);
+    unset($currentCart[$item_id]);
+    $currentCart = array_values($currentCart);
+    $currentCartNewJson = json_encode($currentCart);
+    $query = "UPDATE users SET user_cart = '{$currentCartNewJson}' WHERE user_id = {$user_id} ";
+    $exec_query = mysqli_query($connection, $query);
+    if(!checkQuery($exec_query)) {
+        return false;
+    } else {
+        return true;
+    }
+}
+function showCart(array $currentCart): int {
+    global $connection;
+    $priceSum = 0;
+    for($i=0; $i<=count($currentCart)-1; $i++) {
+        $query = "SELECT * FROM posts WHERE post_id = {$currentCart[$i]} ";
+        $execQuery = mysqli_query($connection, $query);
+        checkQuery($execQuery);
+        while($row = mysqli_fetch_assoc($execQuery)) {
+            $img = $row['post_image'];
+            $price = $row['post_price'];
+            $title = $row['post_title'];
+            $priceSum += $price;
+            ?>
+                <li>
+                    <div class="col-lg-8 cart-container">
+                        <a href='post.php?p_id=<?php echo $currentCart[$i] ?>'>
+                            <img class="img-thumbnail" src='images/<?php echo $img ?>' alt='image' style="width:50px;height:35px;">
+                            <?php echo substr($title, 0, 20) . "..." ?>
+                            <div class="col-lg-8">
+                                <?php echo getPrice($price) . " €" ?>
+                            </div>
+                        </a>
+                        <a class='btn btn-primary' href='index.php?remove=<?php echo $i ?>'>Izņemt
+                            <span class='glyphicon glyphicon-chevron-left'></span>
+                        </a>
+                    </div>
+                </li>
+            <?php
+        }
+    }
+    ?>
+    <div class="col-lg-8" style="margin: 5px">
+        <li>Kopā: <?php echo count($currentCart) ?> preces.</li>
+        <li>Kopsumma: <?php echo getPrice($priceSum) . " €" ?></li>
+    </div>
+    <div>
+        <a class='btn btn-primary' style="margin: 7px" href='index.php?checkout=true'>Pirkt</a>
+    </div>
+    <?php
+    return $priceSum;
+}
+function getUserBalance(int $user_id): int {
+    $user = getUserById($user_id)->fetch_assoc();
+    $currentBalance = $user['user_balance'];
+    return $currentBalance;
+}
+function clearCart(int $user_id): bool {
+    global $connection;
+    $currentCart = [];
+    $currentCartNewJson = json_encode($currentCart);
+    $query = "UPDATE users SET user_cart = '{$currentCartNewJson}' WHERE user_id = {$user_id} ";
+    $exec_query = mysqli_query($connection, $query);
+    if(!checkQuery($exec_query)) {
+        return false;
+    } else {
+        return true;
+    }
+}
+function subtractUserBalance(int $user_id, int $sum): bool {
+    global $connection;
+    $balance = getUserBalance($user_id);
+    $balance -= $sum;
+    $query = "UPDATE users SET user_balance = {$balance} WHERE user_id = {$user_id} ";
+    $exec_query = mysqli_query($connection, $query);
+    if(!checkQuery($exec_query)) {
+        return false;
+    } else {
+        return true;
+    };
+}
+
+
+
+function checkout(): bool {
+
 }
 ?>

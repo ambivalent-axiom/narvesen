@@ -2,7 +2,7 @@
 
 <!-- Blog Search Well -->
 <div class="well">
-    <h4>Blog Search</h4>
+    <h4>Produktu meklētājs</h4>
     <form action="search.php" method="post">
 
     <div class="input-group">
@@ -21,7 +21,7 @@
 <!-- Login Well -->
 <div class="well">
     <form action="includes/login.php" method="post">
-        <h4>Login: 
+        <h4>Klients: 
             <?php 
                 if(isset($_GET['login'])) {
                     echo $_GET['login'];
@@ -34,13 +34,13 @@
         </h4>
         <div class="form-group">
             <div class="form-group">
-                <input name="username" type="text" class="form-control" placeholder="Username">
+                <input name="username" type="text" class="form-control" placeholder="Lietotājvārds">
             </div>
             <div class="input-group">
-                <input name="pass" type="password" class="form-control" placeholder="Password">
+                <input name="pass" type="password" class="form-control" placeholder="Parole">
                 <span class="input-group-btn">
                     <button name="login" class="btn btn-primary" type="submit">
-                        Login
+                        Ienākt
                     </button>
                 </span>
             </div>
@@ -50,21 +50,21 @@
 
 <!-- Blog Categories Well -->
 <div class="well">
-    <h4>Blog Categories</h4>
+    <h4>Tavs grozs</h4>
     <div class="row">
-
-    <?php
-    $query = "SELECT * FROM categories ";
-    $select_categories_sidebar = mysqli_query($connection, $query);
-
-    ?>
         <div class="col-lg-12">
             <ul class="list-unstyled">
                 <?php
-                    while($row = mysqli_fetch_assoc($select_categories_sidebar)) {
-                        $cat_title = $row['cat_title'];
-                        $cat_id = $row['cat_id'];
-                        echo "<li><a href='index.php?cat_id={$cat_id}&filter=categorized'>{$cat_title}</a></li>";
+                    if(isset($_SESSION['id'])) {
+                        $currentCart = getCart($_SESSION['id']);
+                        if(count($currentCart) > 0) {
+                            $_SESSION['cart'] = showCart($currentCart);
+                        } else {
+                            echo "Tavs groziņš šobrīd ir tukšs... :(";
+                        }
+                        
+                    } else {
+                        echo "Lai paņemtu groziņu, piereģistrējies, vai ieej veikalā ar reģistrētu lietotāju.";
                     }
                 ?>
             </ul>

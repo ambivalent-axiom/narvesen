@@ -3,7 +3,7 @@
     $db['host'] = 'localhost';
     $db['user'] = 'root';
     $db['pass'] = '';
-    $db['name'] = 'cms';
+    $db['name'] = 'store';
 
 //check if db connection constants are defined, if not, define.
     if(!defined('HOST')) {

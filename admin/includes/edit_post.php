@@ -4,6 +4,7 @@
     $post_edit_id = mysqli_query($connection, $query);
     while($row = mysqli_fetch_assoc($post_edit_id)) {
         $id = $row['post_id'];
+        $price = $row['post_price'];
         $author = $row['post_author'];
         $title = $row['post_title'];
         $cat = $row['post_category_id'];
@@ -23,6 +24,7 @@
         $post_image_temp = $_FILES['post_image']['tmp_name'];
         $post_tags = escape($_POST['post_tags']);
         $post_content = escape($_POST['post_content']);
+        $post_price = escape($_POST['post_price']);
 
         move_uploaded_file($post_image_temp, "../images/$post_image");
 
@@ -31,8 +33,8 @@
         }
 
         $query = "UPDATE posts SET post_title = '{$post_title}', post_category_id = {$post_category_id}, " .
-                "post_status = '{$post_status}', post_image = '{$post_image}', post_tags = '{$post_tags}', post_content = '{$post_content}' " .
-                "WHERE post_id = {$post_to_edit} ";
+                "post_status = '{$post_status}', post_image = '{$post_image}', post_tags = '{$post_tags}', post_content = '{$post_content}', " .
+                "post_price = {$post_price} WHERE post_id = {$post_to_edit} ";
 
         $update_post = mysqli_query($connection, $query);
 
@@ -91,6 +93,11 @@
     <div class="form-group">
         <label for="post_tags">Post Tags</label>
         <input value="<?php if(isset($tags)) { echo $tags; } ?>" type="text" class="form-control" name="post_tags">
+    </div>
+
+    <div class="form-group">
+        <label for="post_price">Post Price</label>
+        <input value="<?php if(isset($price)) { echo $price; } ?>" type="text" class="form-control" name="post_price">
     </div>
 
     <div class="form-group">

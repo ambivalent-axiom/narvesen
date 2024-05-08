@@ -56,6 +56,7 @@ if(isset($_POST['checkBoxArray'])) {
                 <th>Status</th>
                 <th>Image</th>
                 <th>Tags</th>
+                <th>Price</th>
                 <th>Comments</th>
                 <th>Views</th>
                 <th>Date</th>
@@ -72,6 +73,7 @@ if(isset($_POST['checkBoxArray'])) {
                 
                 while($row = mysqli_fetch_assoc($all_posts)) {
                     $id = $row['post_id'];
+                    $price = $row['post_price'];
                     $author = $row['post_author'];
                     $title = $row['post_title'];
                     $cat = $row['post_category_id'];
@@ -97,6 +99,7 @@ if(isset($_POST['checkBoxArray'])) {
                             <td><?php echo $status ?></td>
                             <td><img src='../images/<?php echo $image ?>' alt='image' style="width:100px;height:50px;"></td>
                             <td><?php echo $tags ?></td>
+                            <td><?php echo getPrice($price) ?></td>
                             
                             <td><a href="comments.php?p_id=<?php echo $id ?>"><?php echo $comments ?></a></td>
 

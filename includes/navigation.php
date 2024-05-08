@@ -28,15 +28,34 @@
                     }
                     ?>
                 </ul>
+
+
+                <ul class='nav navbar-nav navbar-right'>
+
                 <?php
-                    if(isset($_SESSION['role'])) {
-                        echo "<ul class='nav navbar-nav navbar-right'>
-                                <li><a href='admin'>{$_SESSION['username']}</a></li></ul>";
+                    if(isset($_SESSION['role']) && $_SESSION['role'] == 'admin') {
+                        ?>
+                            <li>
+                                <a href="users.php?source=online">Konta atlikums: <?php echo getPrice(getUserBalance($_SESSION['id'])) ?> €</a>
+                            </li>
+                            <li><a href='admin'><?php echo $_SESSION['username'] ?></a></li>
+                        <?php
+                    } else if (isset($_SESSION['role']) && $_SESSION['role'] == 'blogger') {
+                        ?>
+                            <li>
+                                <a href="users.php?source=online">Konta atlikums: <?php echo getPrice(getUserBalance($_SESSION['id'])) ?> €</a>
+                            </li>
+                            <li>
+                                <a href='user.php?u_id=<?php echo $_SESSION['id'] ?>'><?php echo $_SESSION['username'] ?></a>
+                            </li>
+                        
+                        <?php
                     } else {
                         echo "<ul class='nav navbar-nav navbar-right'>
-                                <li><a href='registration.php'>Register</a></li></ul>";
+                            <li><a href='registration.php'>Register</a></li></ul>";
                     }
                 ?>
+                </ul>
             </div>
             <!-- /.navbar-collapse -->
         </div>

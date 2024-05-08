@@ -10,7 +10,7 @@
         if($page > 1) {
             ?>
             <li class="previous">
-                <a href="index.php?page=<?php echo ($page-1); ?>">&larr; Newer </a>
+                <a href="index.php?page=<?php echo ($page-1); ?>">&larr; Iepriekšējā </a>
             </li><?php
         }
     ?>
@@ -20,7 +20,7 @@
     <?php
         if($page < $pages) {
             ?><li class="next">
-                <a href="index.php?page=<?php echo ($page+1); ?>"> Older &rarr;</a>
+                <a href="index.php?page=<?php echo ($page+1); ?>"> Nākamā &rarr;</a>
             </li><?php
         }
     ?>

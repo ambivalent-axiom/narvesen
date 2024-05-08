@@ -24,19 +24,37 @@
                     } else {
                         $pages = showPostsPaginated("", '', $offset);
                     }
-                ?>
-                <!-- Pager -->
-                <?php
-                    if(isset($pages)) {
-                        if($pages > 1) {
-                            include "pager.php";
-                        }
+                    //adding products to cart
+                    if(isset($_GET['to_cart']) && isset($_SESSION['id'])) {
+                        $product = escape($_GET['to_cart']);
+                        $user = $_SESSION['id'];
+                        addToCart($product, $user);
+                    }
+                    //removing products from cart
+                    if(isset($_GET['remove']) && isset($_SESSION['id'])) {
+                        $product = escape($_GET['remove']);
+                        $user = $_SESSION['id'];
+                        removeFromCart($product, $user);
+                    }
+                    //checkout
+                    if(isset($_GET['checkout']) && isset($_SESSION['id'])) {
+                        $user = $_SESSION['id'];
+                        subtractUserBalance($user, $_SESSION['cart']);
+                        clearCart($user);
                     }
                 ?>
             </div>
             <!-- Blog Sidebar Widgets Column -->
             <?php include "includes/sidebar.php" ?>
         </div>
+                        <!-- Pager -->
+        <?php
+            if(isset($pages)) {
+                if($pages > 1) {
+                    include "pager.php";
+                }
+            }
+        ?>
         <!-- /.row -->
 <!-- Footer -->
  <?php include "includes/footer.php" ?>
